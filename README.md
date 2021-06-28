@@ -30,7 +30,8 @@ title:
 - {buildname} is the name of the build job
 
 A dataset already scrapted is provided with this project. You can find it under 
-`graphviz.zip`. Extract the zip in a directory, for example, in `./dataset/graphviz/`.
+`graphviz/`. Five zip are provided and all the job logs of those 5 zips should be 
+put in a same directory, for example, in `./dataset/graphviz/`.
 
 Caution: unzipped, `graphviz.zip` contains 37GB of data.
 
