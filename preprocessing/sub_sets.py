@@ -14,9 +14,10 @@ def shuffle_df(df):
     '''
     index = [e for e in range(df.shape[0])]
     shuffle(index)
-    
+
     shuffled = df.iloc[index]
     return shuffled
+
 
 def get_word_count(res, ngrams):
     '''
@@ -82,7 +83,7 @@ def get_info_rerun(res):
     Output:
     - res   : modified dataset in a pandas dataframe format, with added 
               'info' column.
-    '''    
+    '''
     info = [{} for e in range(res.shape[0])]
 
     curr_commitXjob = ""
@@ -105,7 +106,7 @@ def get_info_rerun(res):
 
         curr_dic["commit_since_flaky"] = since_flaky[i]
         info[i] = curr_dic.copy()
-        
+
         curr_dic["rerun"] += 1
         curr_dic["fail"] += row["status"]
         curr_dic["success"] += 1 - row["status"]
@@ -125,7 +126,7 @@ def just_failure(res):
     Output:
     - res: modified dataset in a pandas dataframe format, containing only failing 
            jobs.
-    '''        
+    '''
     res = res.iloc[[i for i, e in enumerate(res["status"].tolist()) if e == 1]]
     return res
 
@@ -143,13 +144,13 @@ def mask_failure(sets, cond):
     Output:
     - sets: list of dictionaries with keys=train/valid/test and values=modified 
             subsets according to the mask.
-    ''' 
-    mask = ['test'] #if cond == 'None'
+    '''
+    mask = ['test']  # if cond == 'None'
     if cond == "Train":
         mask = ['train', 'test']
     if cond == "All":
         mask = ['train', 'valid', 'test']
-    
+
     for who in mask:
         sets[who] = just_failure(sets[who])
     return sets
@@ -163,7 +164,7 @@ def oversampling(sets):
     - sets    : subset of dataframe format.
     Output:
     - new_sets: oversampled subset.
-    ''' 
+    '''
     sets = sets.reset_index(drop=True)
     ids_stat_flak = [sets[[a == stat and b == flak for a, b in zip(sets['status'], sets['flaky'])]].index.tolist(
     ) for stat in set(sets['status']) for flak in set(sets['flaky'])]
@@ -178,7 +179,6 @@ def oversampling(sets):
 
     new_sets = sets.iloc[new_ids].reset_index(drop=True)
     return new_sets
-
 
 
 ### For random cross validation with train(90%)/valid(5%)/test(5%) ###
@@ -206,16 +206,17 @@ def random_sets_by_type(res, ids, flaky, want):
     id_wanted = [i for i, e in zip(ids, flaky) if e == want]
     shuffle(id_wanted)
     perc10_lim = round(len(id_wanted) * 0.05)
-    
+
     test = [e for l in id_wanted[:perc10_lim] for e in l]
     valid = [e for l in id_wanted[perc10_lim:(2 * perc10_lim)] for e in l]
     train = [e for l in id_wanted[(2 * perc10_lim):] for e in l]
-    
+
     sets = {
         'train': res.iloc[train],
         'valid': res.iloc[valid],
         'test': res.iloc[test]}
     return sets
+
 
 def random_sets(res):
     '''
@@ -237,13 +238,14 @@ def random_sets(res):
         lambda x: "flaky" in list(x)).tolist()
 
     flakys = random_sets_by_type(res, commit_ids, commit_flaky, True)
-    safes  = random_sets_by_type(res, commit_ids, commit_flaky, False)
+    safes = random_sets_by_type(res, commit_ids, commit_flaky, False)
 
     data = {}
     for who in flakys:
         data[who] = shuffle_df(flakys[who].append(safes[who])).reset_index()
 
     return data
+
 
 def sub_sets(P, res):
     '''
@@ -270,6 +272,7 @@ def sub_sets(P, res):
     return SETS
 
 ### For random 10fold cross validation with train(90%)/valid(5%)/test(5%) ###
+
 
 def tenfolds_half_by_type(res, ids, flaky, want):
     '''
@@ -298,7 +301,7 @@ def tenfolds_half_by_type(res, ids, flaky, want):
     perc10_lim = round(len(id_wanted) * 0.05)
 
     sets = []
-    
+
     for i in range(10):
         sets.append([res.iloc[[e for l in id_wanted[perc10_lim * (2 * i):perc10_lim * (2 * i + 1)] for e in l]],
                      res.iloc[[e for l in id_wanted[perc10_lim * (2 * i + 1):perc10_lim * (2 * i + 2)] for e in l]]])
@@ -339,6 +342,7 @@ def tenfolds_half_sets(res):
             data[i] += [shuffle_df(flakys[i]
                                    [1].append(safes[i][1])).reset_index()]
     return data
+
 
 def sub_sets_10fold(P, sets, fold=0, turn=0):
     '''

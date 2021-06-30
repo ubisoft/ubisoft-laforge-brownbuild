@@ -4,6 +4,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 import math
 from scipy.sparse import csr_matrix
 
+
 def set_to_corpus(sets, target=None):
     '''
     From the wordcount sets 'sets', generates a corpus of phrases only containing 
@@ -20,7 +21,7 @@ def set_to_corpus(sets, target=None):
     number of times given in wordcount.
     Ex: sets = [{'a':3, 'b':1}, {'a':2, 'c':2}]
         target = ['a', 'b']
-        
+
         out = ['a a a b', 'a a']
     '''
     here_sets = sets['word_count'].tolist()
@@ -67,7 +68,7 @@ def tf_idf(sets, target=None, only_train=False):
     if not only_train:
         M['valid'] = vectorizer.transform(corpus['valid'])
         M['test'] = vectorizer.transform(corpus['test'])
-    
+
     features = vectorizer.get_feature_names()
     return M, features
 
@@ -106,16 +107,16 @@ def X_values(P, sets):
     - M_tfidf   : dictionary with keys=train/valid/test and values=tfidf matrix 
     - features  : list of words/features of the tfidf matrices (names of the columns)
     '''
-    iter_size = 1000 #size of the sub training sets
+    iter_size = 1000  # size of the sub training sets
     N = math.ceil(sets['train'].shape[0] / iter_size)
     k_selected = []
-    for i in range(N): 
+    for i in range(N):
         # generate tfidf matrices + kbest selecting for each sub training set
         sub_set = {'train': sets['train'].iloc[i * iter_size:(i + 1) * iter_size]}
         M_tfidf, target = tf_idf(sub_set, only_train=True)
         Y_tfidf = y_values(P, sub_set)
         k_selected += kbest(P, M_tfidf['train'], target, Y_tfidf['train'])
-        
+
     # final kbest selection on the union of the preselected features
     k_selected = list(set(k_selected))
     sub_set = {'train': sets['train']}

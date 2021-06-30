@@ -31,7 +31,8 @@ def baseline_metrics(flaky_rate, which):
         met['specificity'] = 0
         met['f1'] = flaky_rate / (1 + flaky_rate)
     return met
-    
+
+
 def baseline(P, data):
     '''
     Computes all baselines performance metrics 
@@ -56,5 +57,3 @@ def baseline(P, data):
     for which in ['random50', 'randomB', 'alwaysBrown']:
         base_met[which] = baseline_metrics(flaky_rate, which)
     return base_met
-
-

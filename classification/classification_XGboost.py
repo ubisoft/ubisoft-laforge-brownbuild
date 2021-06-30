@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import classification.metrics as metrics
 
+
 def pred_xgboost(sets):
     '''
     Trains a xgboost model on the sets (train/valid/test).
@@ -49,7 +50,6 @@ def pred_xgboost(sets):
     return bst, shap_val, pred, pred_prob
 
 
-
 def classify_XGBoost(P, sets):
     '''
     Trains our two layer classification XGBoost model.
@@ -89,8 +89,8 @@ def classify_XGBoost(P, sets):
     model2, shap_val2, pred_2, pred_prob_2 = pred_xgboost(second_sets)
 
     BIG = {}
-    for alpha in range(0,110,10):
-        for beta in range(10,100,10):
+    for alpha in range(0, 110, 10):
+        for beta in range(10, 100, 10):
             pred_prob_ranged = [(a * (100. - beta) + b * beta) /
                                 100.0 for a, b in zip(pred_prob, pred_prob_2)]
             pred_ranged = [int(e >= float(alpha / 100.0))

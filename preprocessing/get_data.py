@@ -8,6 +8,7 @@ MAX_NGRAM = 2
 file_regex = r"((.*_.*_.*_.*_.*_.*)_(.*)_(.*)_([01])(_(.*))?)-processed\.csv"
 date_regex = "%Y_%m_%d_%H_%M_%S"
 
+
 def get_text_count(file):
     '''
     Get the word count in the file with filename 'file'.
@@ -30,6 +31,7 @@ def get_text_count(file):
             dic[count] = loc
             count += 1
     return dic
+
 
 def get_log_data(file, DATA_PATH):
     '''
@@ -55,7 +57,7 @@ def get_log_data(file, DATA_PATH):
 def flaky_state(mean):
     '''
     Returns if a job is flaky or safe.
-    
+
     Parameters:
     - mean: float. Mean result of the jobs run.
     '''
@@ -89,10 +91,11 @@ def flaky_state_all(res):
     res["flaky"] = all_flaky_state["flaky"]
     return res
 
+
 def get_data(P):
     '''
     Gets data for Experiment object 'P'.
-    
+
     Parameters:
     - P  : Experiment object representing the current experiment set-up
     Output:
