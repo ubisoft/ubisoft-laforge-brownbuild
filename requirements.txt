@@ -1,4 +1,4 @@
-xgboost>=0.90
+xgboost==0.90
 numpy>=1.17.1
 pandas>=0.25.1
 pickleshare>=0.7.5
