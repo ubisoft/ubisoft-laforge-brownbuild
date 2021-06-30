@@ -8,7 +8,8 @@ import classification.metrics as metrics
 import tools.pick_call as pick_call
 import os
 import time
-import sys, getopt
+import sys
+import getopt
 import ast
 
 # PATH_experiment is the name of the folder that will contain the pickles
@@ -30,12 +31,12 @@ class Experiment():
     - fail_mask    : mask to filter which subsets must only contain fails (Train/None/All)
     - kbest_thresh : number of features that need to be selected by kbest_t
     - alpha        : weight of model 1 in prediction (and 100-alpha is weight of model 2)
-                     value in 0-100
+                     value in 0-100 (multiples of 10)
     - beta         : threshold for prediction flaky.
-                     value in 0-100
+                     value in 10-90 (multiples of 10)
     '''
 
-    def __init__(self, 
+    def __init__(self,
                  path_data,
                  setting_name='default',
                  ngram=[2],
@@ -52,7 +53,7 @@ class Experiment():
             os.mkdir(self.path_exp)
         # Hyperparam
         self.ngram = ngram
-        self.oversampling = oversampling  
+        self.oversampling = oversampling
         self.fail_mask = fail_mask
         self.kbest_thresh = kbest_thresh
         self.alpha = alpha
@@ -61,18 +62,19 @@ class Experiment():
 
 def results_print(BASELINES, XGB):
     want = ['f1', 'precision', 'recall', 'specificity']
-    
+
     list = ['Run', 'F1-Score', 'Precision', 'Recall', 'Specificity']
     print('{:12s} | {:12s} {:12s} {:12s} {:12s} |'.format(*list))
     print('-' * 68)
-    
+
     for BASE in BASELINES:
-        list = [BASE.upper()] + [str(round(100*BASELINES[BASE][a],1)) for a in want]
+        list = [BASE.upper()] + [str(round(100*BASELINES[BASE][a], 1)) for a in want]
         print('{:12s} | {:12s} {:12s} {:12s} {:12s} |'.format(*list))
-        
-    list = ['XGB'] + [str(round(100*XGB[a],1)) for a in want]
+
+    list = ['XGB'] + [str(round(100*XGB[a], 1)) for a in want]
     print('{:12s} | {:12s} {:12s} {:12s} {:12s} |'.format(*list))
-    
+
+
 def run_cross_val(p, recompute=False):
     '''
     Cross validation run with experiment p.
@@ -82,26 +84,26 @@ def run_cross_val(p, recompute=False):
     If you don't want to use the existing pickle, set recompute = True.
     '''
     start_time = time.time()
-    
-    DATA = pick_call.run_and_pickle(get_data.get_data, 
-                          {'P':p}, 
-                          p.path_exp + 'data.p', 
-                          recompute=recompute)
-    SETS    = pick_call.run_and_pickle(sub_sets.sub_sets, 
-                          {'P':p, 'res':DATA}, 
-                          p.path_exp + 'sets.p', 
-                          recompute=recompute)
-    VECTORS = pick_call.run_and_pickle(vectorization.vectorization, 
-                             {'P':p, 'sets':SETS}, 
-                             p.path_exp + 'vectors.p', 
-                             recompute=recompute)
+
+    DATA = pick_call.run_and_pickle(get_data.get_data,
+                                    {'P': p},
+                                    p.path_exp + 'data.p',
+                                    recompute=recompute)
+    SETS = pick_call.run_and_pickle(sub_sets.sub_sets,
+                                    {'P': p, 'res': DATA},
+                                    p.path_exp + 'sets.p',
+                                    recompute=recompute)
+    VECTORS = pick_call.run_and_pickle(vectorization.vectorization,
+                                       {'P': p, 'sets': SETS},
+                                       p.path_exp + 'vectors.p',
+                                       recompute=recompute)
 
     BASELINES = baseline.baseline(p, DATA)
     BIG = classification_XGBoost.classify_XGBoost(p, VECTORS)
     interest = BIG['%.1fvar_%dtresh' % (float(p.beta), p.alpha)]['result']
-    
+
     results_print(BASELINES, interest)
-    print('===== TOTAL TIME: ', round(time.time() - start_time,2), 'sec =====')
+    print('===== TOTAL TIME: ', round(time.time() - start_time, 2), 'sec =====')
 
 
 def run_10cross_val(p, recompute=False):
@@ -113,27 +115,29 @@ def run_10cross_val(p, recompute=False):
     If you don't want to use the existing pickle, set recompute = True.
     '''
     start_time = time.time()
-    
-    DATA = pick_call.run_and_pickle(get_data.get_data, 
-                          {'P':p}, 
-                          p.path_exp + 'data.p', 
-                          recompute=recompute)
 
-    sets_10fold = pick_call.run_and_pickle(sub_sets.tenfolds_half_sets, 
-                                      {'res':DATA}, 
-                                      p.path_exp + 'sets_10fold.p', 
-                                      recompute=recompute)
+    DATA = pick_call.run_and_pickle(get_data.get_data,
+                                    {'P': p},
+                                    p.path_exp + 'data.p',
+                                    recompute=recompute)
+
+    sets_10fold = pick_call.run_and_pickle(sub_sets.tenfolds_half_sets,
+                                           {'res': DATA},
+                                           p.path_exp + 'sets_10fold.p',
+                                           recompute=recompute)
 
     all_PRED = {}
     for fold in range(10):
         for turn in range(2):
-            SETS = sub_sets.sub_sets_10fold( **{'P':p, 'sets':sets_10fold, 'fold':fold, 'turn':turn} )
-            
-            VECTORS = pick_call.run_and_pickle(vectorization.vectorization, 
-                                  {'P':p, 'sets':SETS}, 
-                                  p.path_exp + 'vectors_10fold_run%d_turn%d.p' % (fold+1, turn+1), 
-                                  recompute=recompute)
-            
+            SETS = sub_sets.sub_sets_10fold(
+                **{'P': p, 'sets': sets_10fold, 'fold': fold, 'turn': turn})
+
+            VECTORS = pick_call.run_and_pickle(vectorization.vectorization,
+                                               {'P': p, 'sets': SETS},
+                                               p.path_exp +
+                                               'vectors_10fold_run%d_turn%d.p' % (fold+1, turn+1),
+                                               recompute=recompute)
+
             BIG = classification_XGBoost.classify_XGBoost(p, VECTORS)
 
             for i in BIG:
@@ -152,31 +156,31 @@ def run_10cross_val(p, recompute=False):
             all_PRED[i]['pred']) for i in all_PRED}
     interest = all_BIG['%.1fvar_%dtresh' % (float(p.beta), p.alpha)]
     BASELINES = baseline.baseline(p, DATA)
-    
+
     results_print(BASELINES, interest)
-    
-    print('===== TOTAL TIME: ', round(time.time() - start_time,2), 'sec =====')
+
+    print('===== TOTAL TIME: ', round(time.time() - start_time, 2), 'sec =====')
 
 
 if __name__ == "__main__":
     try:
-        opts, _ = getopt.getopt(sys.argv[1:],'d:',['path_data=',
-                                             'setting_name=',
-                                             'ngram=',
-                                             'oversampling=',
-                                             'fail_mask=',
-                                             'kbest_thresh=',
-                                             'alpha=',
-                                             'beta=',
-                                             '10fold',
-                                             'recompute'])                                 
+        opts, _ = getopt.getopt(sys.argv[1:], 'd:', ['path_data=',
+                                                     'setting_name=',
+                                                     'ngram=',
+                                                     'oversampling=',
+                                                     'fail_mask=',
+                                                     'kbest_thresh=',
+                                                     'alpha=',
+                                                     'beta=',
+                                                     '10fold',
+                                                     'recompute'])
     except getopt.GetoptError:
-        print ('main.py -d <data_path> [--setting_name <string>] [--ngram <list int>] [--oversampling <bool>] [--fail_mask <Train/Valid/All>] [--kbest_thresh] <int>] [--alpha <int>] [--beta <int]')
+        print('main.py -d <data_path> [--setting_name <string>] [--ngram <list int>] [--oversampling <bool>] [--fail_mask <Train/Valid/All>] [--kbest_thresh] <int>] [--alpha <int>] [--beta <int]')
         sys.exit(2)
-    
+
     fun = run_cross_val
     recompute = False
-    
+
     params = {}
     for arg, val in opts:
         if arg in ['-d', '--path_data']:
@@ -184,31 +188,31 @@ if __name__ == "__main__":
         elif arg == '--setting_name':
             params['setting_name'] = val
         elif arg == '--ngram':
-            assert ast.literal_eval(val) in [[1], [2], [1,2]]
+            assert ast.literal_eval(val) in [[1], [2], [1, 2]]
             params['ngram'] = ast.literal_eval(val)
         elif arg == '--oversampling':
             assert val in ['True', 'False']
             params['oversampling'] = ast.literal_eval(val)
         elif arg == '--fail_mask':
-            assert val in ['Train' ,'None', 'All']
+            assert val in ['Train', 'None', 'All']
             params['fail_mask'] = val
         elif arg == '--kbest_thresh':
-            assert int(val)>0
+            assert int(val) > 0
             params['kbest_thresh'] = int(val)
         elif arg == '--alpha':
-            assert 0 <= int(val) <=100
+            assert int(val) in [i*10 in range(,11)]
             params['alpha'] = int(val)
         elif arg == '--beta':
-            assert 0 <= int(val) <=100
+            assert int(val) in [i*10 in range(1,10)]
             params['beta'] = int(val)
         elif arg == '--10fold':
             fun = run_10cross_val
         elif arg == '--recompute':
             recompute = True
-        
-    print('Experiment:' , params)        
+
+    print('Experiment:', params)
     p = Experiment(**params)
-    
+
     fun(p, recompute)
-    
+
     # python .\main.py -p 'D:/DATA_pickle/DATA_graphviz_pickle/' --ngram [1] --oversampling=True

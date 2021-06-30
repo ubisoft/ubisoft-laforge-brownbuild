@@ -239,12 +239,13 @@ Additional parameters are available to choose the Experiment set-up, which must 
   
 - `--alpha <int>`: [optional]
 
-  Int value (between 0 and 100). Weight of model 1 in prediction (and 100-alpha is weight of model 2)
+  Int value (between 0 and 100, multiples of 10). Weight of model 1 in prediction 
+  (and 100-alpha is weight of model 2)
   (Default= 70)
   
 - `--beta <int>`: [optional]
 
-  Int value (between 0 and 100). Threshold for prediction brown.
+  Int value (between 10 and 90, multiples of 10). Threshold for prediction brown.
   (Default= 10)
   
 - `--10fold`: [optional]
