@@ -261,3 +261,6 @@ Additional parameters are available to choose the Experiment set-up, which must 
 
 An example of features selected are shown in the file `feature_extracted.txt`.
 The 300 selected features are ordered by alphabetic order.
+
+
+© [2020] Ubisoft Entertainment. All Rights Reserved
