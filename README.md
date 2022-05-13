@@ -29,7 +29,7 @@ title:
 - {classification} shows if the build failed (1) or succeeded (0) 
 - {buildname} is the name of the build job
 
-A dataset already scrapted is provided with this project. You can find it under 
+A dataset already scraped is provided with this project. You can find it under 
 `graphviz/`. Five zip are provided and all the job logs of those 5 zips should be 
 put in a same directory, for example, in `./dataset/graphviz/`.
 
@@ -110,7 +110,7 @@ title:
 - {classification} shows if the build failed (1) or succeeded (0) 
 - {buildname} is the name of the build job
 
-A dataset already scrapted is provided with this project. You can find it under 
+A dataset already scraped is provided with this project. You can find it under 
 `dataset/graphviz.zip`. Extract the zip in the dataset directory.
 
 ## Vocabulary extraction
@@ -254,7 +254,7 @@ Additional parameters are available to choose the Experiment set-up, which must 
   
 - `--recompute`: [optional]
 
-  In in the command, does not use the previously computed pickles, recomputes everything.
+  If in the command, does not use the previously computed pickles, recomputes everything.
 
 
 ### Feature selection
