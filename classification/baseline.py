@@ -11,7 +11,7 @@ def baseline_metrics(flaky_rate, which):
     - flaky_rate: flaky rate of failing jobs in the project's dataset.
     - which     : name of the baseline (default=alwaysBrown).
     Output:
-    - met       : dictionnary containing all the performance metrics. 
+    - met       : dictionary containing all the performance metrics. 
                   Keys= name of the metrics and value= the value of the metric.
     '''
     met = {}
@@ -43,7 +43,7 @@ def baseline(P, data):
     - P       : Experiment object representing the current experiment set-up.
     - data    : full dataset in a pandas dataframe format.
     Output:
-    - base_met: dictionnary with keys=name of baseline and value=metrics of 
+    - base_met: dictionary with keys=name of baseline and value=metrics of 
                 baseline. The metrics of a baseline is a dictionary with 
                 keys= name of the metric and value= the value of the metric.
     '''
